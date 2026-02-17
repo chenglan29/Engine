@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unity Editor UI Clone</title>
+    <style>
+        /* 全局样式重置和基础设置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1e1e1e;
+            color: #cccccc;
+            /* overflow: hidden; */
+            height: 100vh;
+            min-width: 800px;
+        }
+        iframe {
+            border: none;
+        }
+        /* 顶部工具栏样式 */
+        .unity-toolbar {
+            height: 30px;
+            background-color: #303030;
+            border-bottom: 1px solid #181818;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            gap: 15px;
+            user-select: none;
+        }
+
+        .toolbar-btn {
+            color: #cccccc;
+            background: none;
+            border: none;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 12px;
+            border-radius: 2px;
+        }
+
+        .toolbar-btn:hover {
+            background-color: #444444;
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 20px;
+            background-color: #444444;
+        }
+
+        /* 主容器布局 */
+        .unity-container {
+            display: flex;
+            height: calc(100vh - 30px);
+        }
+
+        /* 左侧面板 (Project/Console) */
+        .unity-left-panel {
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #181818;
+        }
+
+        /* 面板头部样式 */
+        .panel-header {
+            height: 22px;
+            background-color: #252526;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            font-size: 11px;
+            border-bottom: 1px solid #181818;
+            user-select: none;
+        }
+
+        .panel-tabs {
+            display: flex;
+            gap: 5px;
+        }
+
+        .panel-tab {
+            padding: 2px 6px;
+            cursor: pointer;
+            border-radius: 2px 2px 0 0;
+        }
+
+        .panel-tab.active {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+
+        .panel-tab:hover:not(.active) {
+            background-color: #3a3a3a;
+        }
+
+        /* 面板内容区域 */
+        .panel-content {
+            flex: 1;
+            overflow: auto;
+            padding: 5px;
+            font-size: 12px;
+        }
+
+        /* 项目面板内容 */
+        .project-item {
+            padding: 2px 5px;
+            margin: 1px 0;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        .project-item:hover {
+            background-color: #37373d;
+        }
+
+        .project-folder {
+            color: #9cdcfe;
+        }
+
+        .project-file {
+            color: #ce9178;
+        }
+
+        /* 中间主区域 (Scene/Game) */
+        .unity-main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #181818;
+        }
+
+        .scene-view {
+            flex: 1;
+            background-color: #2a2a2a;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scene-placeholder {
+            color: #888888;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* 右侧检查器面板 */
+        .unity-inspector-panel {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 检查器面板属性项 */
+        .inspector-property {
+            padding: 8px 5px;
+            border-bottom: 1px solid #2d2d30;
+        }
+
+        .property-label {
+            font-size: 11px;
+            color: #9cdcfe;
+            margin-bottom: 4px;
+        }
+
+        .property-input {
+            width: 100%;
+            background-color: #2d2d30;
+            border: 1px solid #444444;
+            color: #ffffff;
+            padding: 4px;
+            border-radius: 2px;
+            font-size: 12px;
+        }
+
+        /* 分割线样式 (用于拖拽调整面板大小) */
+        .splitter {
+            width: 4px;
+            height: 100%;
+            background-color: #303030;
+            cursor: ew-resize;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .splitter:hover {
+            background-color: #444444;
+        }
+
+        .splitter-handle {
+            width: 1px;
+            height: 20px;
+            background-color: #666666;
+        }
+
+        /* 底部控制台面板 */
+        .unity-console-panel {
+            height: 150px;
+            border-top: 1px solid #181818;
+        }
+
+        .console-message {
+            padding: 2px 5px;
+            font-size: 11px;
+            border-bottom: 1px solid #2d2d30;
+        }
+
+        .console-log {
+            color: #cccccc;
+        }
+
+        .console-warning {
+            color: #dcdcaa;
+        }
+
+        .console-error {
+            color: #f48771;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部工具栏 -->
+    <div class="unity-toolbar">
+        <button class="toolbar-btn">文件</button>
+        <button class="toolbar-btn">编辑</button>
+        <!-- <button class="toolbar-btn">Assets</button>
+        <button class="toolbar-btn">GameObject</button>
+        <button class="toolbar-btn">Component</button>
+        <button class="toolbar-btn">Window</button> -->
+        <button class="toolbar-btn">帮助</button>
+        <div class="toolbar-divider"></div>
+        <button class="toolbar-btn">演绎</button>
+        <button class="toolbar-btn">暂停</button>
+        <!-- <button class="toolbar-btn">分布</button> -->
+        <div class="toolbar-divider"></div>
+        <button class="toolbar-btn">保存</button>
+        <!-- <button class="toolbar-btn">Undo</button> -->
+        <!-- <button class="toolbar-btn">Redo</button> -->
+    </div>
+
+    <!-- 主容器 -->
+    <div class="unity-container">
+        <!-- 左侧面板 -->
+        <div class="unity-left-panel" id="leftPanel">
+            <!-- 项目面板 -->
+            <div style="flex: 1; display: flex; flex-direction: column;">
+                <div class="panel-header">
+                    <div class="panel-tabs">
+                        <div class="panel-tab active" data-panel="project">目录</div>
+                        <!-- <div class="panel-tab" data-panel="hierarchy">Hierarchy</div> -->
+                    </div>
+                </div>
+                <div class="panel-content" id="projectPanel">
+                    <!-- <div class="project-item project-folder">Assets</div>
+                    <div class="project-item project-folder" style="padding-left: 15px;">Scenes</div>
+                    <div class="project-item project-file" style="padding-left: 30px;">MainScene.unity</div>
+                    <div class="project-item project-folder" style="padding-left: 15px;">Scripts</div>
+                    <div class="project-item project-file" style="padding-left: 30px;">PlayerController.cs</div>
+                    <div class="project-item project-file" style="padding-left: 30px;">GameManager.cs</div>
+                    <div class="project-item project-folder" style="padding-left: 15px;">Materials</div>
+                    <div class="project-item project-folder" style="padding-left: 15px;">Textures</div>
+                    <div class="project-item project-file" style="padding-left: 30px;">player_texture.png</div> -->
+                </div>
+            </div>
+
+            <!-- 控制台面板 -->
+            <div class="unity-console-panel">
+                <div class="panel-header">
+                    <div class="panel-tabs">
+                        <div class="panel-tab active">控制台</div>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <!-- <div class="console-message console-log">[LOG] Project loaded successfully</div>
+                    <div class="console-message console-warning">[WARNING] Missing collider on GameObject: Player</div>
+                    <div class="console-message console-error">[ERROR] NullReferenceException in GameManager.cs:24</div> -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 左侧分割线 -->
+        <div class="splitter" id="leftSplitter">
+            <div class="splitter-handle"></div>
+        </div>
+
+        <!-- 中间主区域 -->
+        <div class="unity-main-area">
+            <div class="panel-header">
+                <div class="panel-tabs">
+                    <div class="panel-tab active">场景</div>
+                    <div class="panel-tab">代码</div>
+                </div>
+            </div>
+            <iframe class="scene-view"></iframe>
+        </div>
+
+        <!-- 右侧分割线 -->
+        <div class="splitter" id="rightSplitter">
+            <div class="splitter-handle"></div>
+        </div>
+
+        <!-- 右侧检查器面板 -->
+        <div class="unity-inspector-panel" id="inspectorPanel">
+            <div class="panel-header">
+                <div class="panel-tabs">
+                    <div class="panel-tab active">Inspector</div>
+                </div>
+            </div>
+            <div class="panel-content">
+                <div class="inspector-property">
+                    <div class="property-label">Transform</div>
+                    <input type="text" class="property-input" value="Position: X 0, Y 0, Z 0">
+                    <input type="text" class="property-input" value="Rotation: X 0, Y 0, Z 0" style="margin-top: 4px;">
+                    <input type="text" class="property-input" value="Scale: X 1, Y 1, Z 1" style="margin-top: 4px;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 面板分割线拖拽调整大小功能
+        function initSplitter(splitterId, targetPanelId, isLeftPanel = true) {
+            const splitter = document.getElementById(splitterId);
+            const targetPanel = document.getElementById(targetPanelId);
+            
+            let isDragging = false;
+            // 开始拖拽
+            splitter.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                document.body.style.cursor = 'ew-resize';
+                e.preventDefault();
+            });
+
+            // 结束拖拽
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    document.body.style.cursor = 'default';
+                }
+            });
+
+            // 拖拽过程
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+
+                // 获取容器的位置和尺寸
+                const container = document.querySelector('.unity-container');
+                const containerRect = container.getBoundingClientRect();
+                
+                // 计算新的面板宽度
+                let newWidth;
+                if (isLeftPanel) {
+                    newWidth = e.clientX - containerRect.left;
+                } else {
+                    newWidth = containerRect.right - e.clientX;
+                }
+
+                // 设置最小宽度限制
+                if (newWidth < 150) newWidth = 150;
+                if (newWidth > 500) newWidth = 500;
+
+                // 应用新宽度
+                targetPanel.style.width = `${newWidth}px`;
+            });
+        }
+
+        // 初始化分割线
+        initSplitter('leftSplitter', 'leftPanel', true);
+        initSplitter('rightSplitter', 'inspectorPanel', false);
+
+        // 面板标签切换功能
+        document.querySelectorAll('.panel-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 获取同组的所有标签
+                const parentTabs = tab.parentElement.querySelectorAll('.panel-tab');
+                // 移除所有active状态
+                parentTabs.forEach(t => t.classList.remove('active'));
+                // 给当前点击的标签添加active状态
+                tab.classList.add('active');
+                
+                // 这里可以扩展：根据标签切换对应的面板内容
+                const panelName = tab.getAttribute('data-panel');
+                if (panelName) {
+                    // 示例：切换Project/Hierarchy面板
+                    console.log(`切换到 ${panelName} 面板`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

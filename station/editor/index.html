@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engine - 项目列表</title>
+    <link rel="stylesheet" type="text/css" href="css/theme.css">
+    <style>
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 页面主体样式 */
+        body {
+            min-width: 350px;
+            background-color: var(--bg-green);
+            /* 浅绿背景，提升视觉舒适度 */
+            color: var(--text-color);
+            /* 深绿色文字，保证可读性 */
+            line-height: 1.6;
+        }
+
+        /* 顶部导航/用户名区域 */
+        .header {
+            background-color: var(--primary-green);
+            /* 主绿色 */
+            padding: 1rem 2rem;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #username {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* 项目列表容器 */
+        #project-list {
+            display: grid;
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* 单个项目卡片样式 */
+        .project-item {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 4px solid var(--side-green);
+            /* 绿色左侧边框，突出卡片 */
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* 卡片悬浮效果 */
+        .project-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+        }
+
+        /* 项目名称样式 */
+        .project-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 0.8rem;
+        }
+
+        /* 项目介绍样式 */
+        .project-desc {
+            color: var(--primary-green);
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        /* 项目信息行样式 */
+        .project-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        /* 信息标签样式 */
+        .info-label {
+            font-weight: bold;
+            color: var(--dark-green);
+            min-width: 80px;
+        }
+
+        /* 版本号样式 */
+        .project-version {
+            margin-top: 1rem;
+            padding-top: 0.8rem;
+            border-top: 1px dashed var(--border-green);
+            /* 浅绿色虚线分隔 */
+            font-size: 0.9rem;
+            color: var(--primary-green);
+        }
+
+        /* 响应式适配 - 小屏幕优化 */
+        @media (max-width: 768px) {
+            .project-info {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .info-label {
+                min-width: auto;
+            }
+
+            .project-item {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 顶部用户名区域 -->
+    <header class="header">
+        <div id="username" style="text-decoration: underline;" onclick="location.href = './person.html'">用户名</div>
+    </header>
+
+    <!-- 项目列表 -->
+    <div id="project-list">
+        <button onclick="location.href = './newProject.html'"
+            style="height: 50px;font-size: 32px;border: none;background: var(--primary-green);color: white;">新建项目</button>
+    </div>
+    <script src="./js/s.js"></script>
+    <script src="./js/network.js"></script>
+    <script>
+        visit("getProjectList", (data) => {
+            document.getElementById("username").innerHTML = SRead("token").split("~")[0];
+            data.projectList.forEach((item, index) => {
+                document.getElementById("project-list").innerHTML += `
+                <div class="project-item">
+                    <div class="project-name" style="text-decoration: underline;color: var(--primary-green)" onclick="location.href = './project.html?${index}'">${item.name}</div>
+                    <div class="project-desc">${item.desc}</div>
+                    <div class="project-info">
+                        <span class="info-label">发起者:</span>
+                        <span>${item.creator}</span>
+                    </div>
+                    <div class="project-info">
+                        <span class="info-label">参与者:</span>
+                        <span>${item.contributor}</span>
+                    </div>
+                    <div class="project-info">
+                        <span class="info-label">正在编辑:</span>
+                        <span class="editing-participants">${item.working}</span>
+                    </div>
+                    <div class="project-info">
+                        <span class="info-label">创建时间:</span>
+                        <span>${new Date(item.date)}</span>
+                    </div>
+                    <div class="project-version">版本号: ${item.version}</div>
+                </div>
+                    `
+            })
+        });
+    </script>
+</body>
+
+</html>

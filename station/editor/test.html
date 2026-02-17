@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>输入框弹窗封装</title>
+    <style>
+        /* 弹窗遮罩层样式 */
+        .win-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        /* 弹窗容器样式 */
+        .win-modal {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 提示文本样式 */
+        .win-tip {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 16px;
+        }
+
+        /* 输入框/文本域通用样式 */
+        .win-input, .win-textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+
+        /* 文本域样式（适配换行） */
+        .win-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* 按钮容器样式 */
+        .win-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* 按钮样式 */
+        .win-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .win-cancel {
+            background: #eee;
+            color: #666;
+        }
+
+        .win-confirm {
+            background: #007bff;
+            color: #fff;
+        }
+
+        .win-confirm:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="testWin()">测试弹窗</button>
+
+    <script>
+        /**
+         * 输入框弹窗函数
+         * @param {string} tip - 弹窗提示文本
+         * @param {string} defaultValue - 输入框初始记忆值
+         * @param {boolean} isMultiline - 是否允许换行（true=textarea，false=input）
+         * @returns {Promise<string|null>} - 确认返回输入值，取消返回null
+         */
+        function win(tip, defaultValue = '', isMultiline = false) {
+            // 返回Promise，方便异步处理确认/取消操作
+            return new Promise((resolve) => {
+                // 1. 检查是否已存在弹窗，存在则先移除（避免重复创建）
+                const oldOverlay = document.querySelector('.win-overlay');
+                if (oldOverlay) {
+                    oldOverlay.remove();
+                }
+
+                // 2. 创建遮罩层
+                const overlay = document.createElement('div');
+                overlay.className = 'win-overlay';
+
+                // 3. 创建弹窗容器
+                const modal = document.createElement('div');
+                modal.className = 'win-modal';
+
+                // 4. 创建提示文本
+                const tipElement = document.createElement('p');
+                tipElement.className = 'win-tip';
+                tipElement.textContent = tip;
+                modal.appendChild(tipElement);
+
+                // 5. 根据是否换行创建输入框/文本域
+                let inputElement;
+                if (isMultiline) {
+                    inputElement = document.createElement('textarea');
+                    inputElement.className = 'win-textarea';
+                } else {
+                    inputElement = document.createElement('input');
+                    inputElement.className = 'win-input';
+                    inputElement.type = 'text';
+                }
+                // 设置初始记忆值
+                inputElement.value = defaultValue;
+                modal.appendChild(inputElement);
+
+                // 6. 创建按钮容器
+                const buttons = document.createElement('div');
+                buttons.className = 'win-buttons';
+
+                // 取消按钮
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'win-btn win-cancel';
+                cancelBtn.textContent = '取消';
+                cancelBtn.onclick = () => {
+                    overlay.remove(); // 移除弹窗
+                    resolve(null); // 取消返回null
+                };
+
+                // 确认按钮
+                const confirmBtn = document.createElement('button');
+                confirmBtn.className = 'win-btn win-confirm';
+                confirmBtn.textContent = '确认';
+                confirmBtn.onclick = () => {
+                    const inputValue = inputElement.value.trim();
+                    overlay.remove(); // 移除弹窗
+                    resolve(inputValue); // 确认返回输入值
+                };
+
+                buttons.appendChild(cancelBtn);
+                buttons.appendChild(confirmBtn);
+                modal.appendChild(buttons);
+                overlay.appendChild(modal);
+
+                // 7. 点击遮罩层取消弹窗
+                overlay.onclick = (e) => {
+                    if (e.target === overlay) {
+                        overlay.remove();
+                        resolve(null);
+                    }
+                };
+
+                // 8. 将弹窗添加到页面
+                document.body.appendChild(overlay);
+
+                // 9. 自动聚焦输入框
+                inputElement.focus();
+            });
+        }
+
+        // 测试函数（可删除，仅用于演示）
+        async function testWin() {
+            // 调用弹窗：提示文本、初始记忆值、是否换行
+            const result = await win('请输入你的意见：', '我觉得这个弹窗很好用', true);
+            if (result !== null) {
+                alert(`你输入的内容是：${result}`);
+            } else {
+                alert('你取消了输入');
+            }
+        }
+    </script>
+</body>
+</html>
