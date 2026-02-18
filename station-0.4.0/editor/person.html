@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>绿色主题个人中心</title>
+    <style>
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+            vertical-align: middle;
+
+        }
+
+        body {
+            background-color: #f5f8f3;
+            color: #333;
+        }
+
+        /* 页面容器 */
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 左侧菜单栏样式 */
+        .sidebar {
+            width: 240px;
+            background-color: #2d8659;
+            color: white;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        /* 侧边栏头部 */
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #3a996c;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* 菜单列表 */
+        .menu-list {
+            list-style: none;
+        }
+
+        .menu-item {
+            margin-bottom: 5px;
+        }
+
+        .menu-link {
+            display: block;
+            padding: 12px 20px;
+            color: #e8f5e9;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        /* 菜单选中/hover 效果 */
+        .menu-link:hover,
+        .menu-link.active {
+            background-color: #3a996c;
+            border-left-color: #81c784;
+            color: white;
+        }
+
+        /* 退出登录按钮特殊样式 */
+        .logout-btn {
+            background-color: #1b5e20;
+            margin-top: 20px;
+        }
+
+        .logout-btn:hover {
+            background-color: #2e7d32;
+        }
+
+        /* 右侧内容区域 */
+        .content {
+            flex: 1;
+            padding: 30px;
+            background-color: white;
+            box-shadow: -1px 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .content-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .content-header h1 {
+            color: #2d8659;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .content-body {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        /* 内容区域默认提示 */
+        .default-content {
+            text-align: center;
+            padding: 50px 0;
+            color: #888;
+        }
+
+        .default-content i {
+            font-size: 60px;
+            color: #a5d6a7;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 10px 0;
+            }
+
+            .menu-list {
+                display: flex;
+                flex-wrap: wrap;
+            }
+
+            .menu-item {
+                flex: 1;
+                margin-bottom: 0;
+            }
+
+            .menu-link {
+                text-align: center;
+                padding: 10px 5px;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+            }
+
+            .menu-link:hover,
+            .menu-link.active {
+                border-left: none;
+                border-bottom-color: #81c784;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 左侧菜单栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>
+                    <button style="width: 20px;height: 20px;" onclick="location.href='./index.html'">&#60;</button>
+                    个人中心
+                </h2>
+            </div>
+            <ul class="menu-list">
+                <li class="menu-item">
+                    <a class="menu-link active" onclick="showContent('profile','个人资料')">
+                        个人资料
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link logout-btn" onclick="logout()">
+                        退出登录
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 右侧内容栏 -->
+        <main class="content">
+            <div class="content-header">
+                <h1 id="content-title">个人资料设置</h1>
+            </div>
+            <div class="content-body" id="content-body">
+                <!-- 个人资料设置内容 -->
+                <div id="profile-content">
+                    <h3>基本信息</h3>
+                    <form style="margin-top: 20px;">
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; color: #2d8659;">用户名</label>
+                            <span id="username"></span>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; color: #2d8659;">邮箱</label>
+                            <input type="email" id="email"
+                                style="width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" id="">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; color: #2d8659;">手机号</label>
+                            <input type="tel" id="phone"
+                                style="width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                        <button type="button"
+                            style="background-color: #2d8659; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer;">保存修改</button>
+                    </form>
+                </div>
+
+                <!-- 其他成员列表内容（默认隐藏） -->
+                <div id="members-content" style="display: none;">
+                    <h3>成员列表</h3>
+                </div>
+
+                <!-- 事务管理内容（默认隐藏） -->
+                <div id="tasks-content" style="display: none;">
+                    <h3>事务列表</h3>
+                    <div style="margin-top: 20px; width: 600px;">
+                        <div
+                            style="padding: 12px; background-color: #e8f5e9; border-left: 4px solid #2d8659; margin-bottom: 10px;">
+                            <h4 style="color: #2d8659; margin-bottom: 5px;">待办事务1</h4>
+                            <p style="font-size: 14px; color: #666;">完成项目需求文档编写 - 截止日期：2026-02-20</p>
+                        </div>
+                        <div
+                            style="padding: 12px; background-color: #e8f5e9; border-left: 4px solid #2d8659; margin-bottom: 10px;">
+                            <h4 style="color: #2d8659; margin-bottom: 5px;">待办事务2</h4>
+                            <p style="font-size: 14px; color: #666;">参加团队周会 - 时间：2026-02-16 14:00</p>
+                        </div>
+                        <div
+                            style="padding: 12px; background-color: #f1f8e9; border-left: 4px solid #81c784; margin-bottom: 10px;">
+                            <h4 style="color: #66bb6a; margin-bottom: 5px;">已完成事务</h4>
+                            <p style="font-size: 14px; color: #666;">整理个人中心页面代码 - 完成时间：2026-02-12222
+
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="./js/s.js"></script>
+    <script src="./js/network.js"></script>
+    <script>
+        visit("getInfo", (data) => {
+            document.getElementById("email").value = data.infomation.email;
+            document.getElementById("phone").value = data.infomation.phone;
+        })
+        // 切换菜单内容显示
+        function showContent(type, title) {
+            // 隐藏所有内容
+            document.getElementById('profile-content').style.display = 'none';
+            document.getElementById('members-content').style.display = 'none';
+            document.getElementById('tasks-content').style.display = 'none';
+
+            // 移除所有菜单的active类
+            const menuLinks = document.querySelectorAll('.menu-link');
+            menuLinks.forEach(link => link.classList.remove('active'));
+
+            // 显示对应内容并激活菜单
+            document.getElementById(`${type}-content`).style.display = 'block';
+            event.target.classList.add('active');
+
+            document.getElementById('content-title').textContent = title;
+        }
+
+        // 退出登录功能
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                // 这里可以添加实际的退出登录逻辑，比如跳转到登录页
+                SRead("token", "");
+                location.href = "/editor/login.html";
+                // window.location.href = 'login.html'; // 实际项目中可启用此行跳转登录页
+            }
+        }
+        document.getElementById("username").innerHTML = SRead("username");
+    </script>
+</body>
+
+</html>
