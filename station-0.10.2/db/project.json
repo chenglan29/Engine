@@ -1,0 +1,30 @@
+[
+    {
+        "name": "测试",
+        "desc": "测试",
+        "creator": [
+            "root"
+        ],
+        "contributor": [],
+        "working": [
+            "root"
+        ],
+        "date": "2026/02/02 10:00",
+        "version": "0.1",
+        "path": {
+            "main": {
+                "是否使用HTML5": true,
+                "字符集": "UTF-8",
+                "path": {
+                    "p": {
+                        "代码":"测试"
+                    }
+                }
+            },
+            "p": {}
+        },
+        "log": [
+            []
+        ]
+    }
+]

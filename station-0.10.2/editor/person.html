@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>绿色主题个人中心</title>
+    <style>
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+            vertical-align: middle;
+
+        }
+
+        body {
+            background-color: #f5f8f3;
+            color: #333;
+        }
+
+        /* 页面容器 */
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 左侧菜单栏样式 */
+        .sidebar {
+            width: 240px;
+            background-color: #2d8659;
+            color: white;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        /* 侧边栏头部 */
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #3a996c;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* 菜单列表 */
+        .menu-list {
+            list-style: none;
+        }
+
+        .menu-item {
+            margin-bottom: 5px;
+        }
+
+        .menu-link {
+            display: block;
+            padding: 12px 20px;
+            color: #e8f5e9;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        /* 菜单选中/hover 效果 */
+        .menu-link:hover,
+        .menu-link.active {
+            background-color: #3a996c;
+            border-left-color: #81c784;
+            color: white;
+        }
+
+        /* 退出登录按钮特殊样式 */
+        .logout-btn {
+            background-color: #1b5e20;
+            margin-top: 20px;
+        }
+
+        .logout-btn:hover {
+            background-color: #2e7d32;
+        }
+
+        /* 右侧内容区域 */
+        .content {
+            flex: 1;
+            padding: 30px;
+            background-color: white;
+            box-shadow: -1px 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .content-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .content-header h1 {
+            color: #2d8659;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .content-body {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        /* 内容区域默认提示 */
+        .default-content {
+            text-align: center;
+            padding: 50px 0;
+            color: #888;
+        }
+
+        .default-content i {
+            font-size: 60px;
+            color: #a5d6a7;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 10px 0;
+            }
+
+            .menu-list {
+                display: flex;
+                flex-wrap: wrap;
+            }
+
+            .menu-item {
+                flex: 1;
+                margin-bottom: 0;
+            }
+
+            .menu-link {
+                text-align: center;
+                padding: 10px 5px;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+            }
+
+            .menu-link:hover,
+            .menu-link.active {
+                border-left: none;
+                border-bottom-color: #81c784;
+            }
+        }
+
+        .head {
+            width: 100px;
+            height: 100px;
+            border-radius: 50px;
+            border: 1px solid gray;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 左侧菜单栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>
+                    <button style="width: 20px;height: 20px;" onclick="location.href='./index.html'">&#60;</button>
+                    个人中心
+                </h2>
+            </div>
+            <ul class="menu-list">
+                <li class="menu-item">
+                    <a class="menu-link active" onclick="showContent('profile','个人资料')">
+                        个人资料
+                    </a>
+                </li>
+                <li class="menu-item" id="manageMember" style="display: none;">
+                    <a class="menu-link" onclick="showContent('member','成员管理')">
+                        成员管理
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link logout-btn" onclick="logout()">
+                        退出登录
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 右侧内容栏 -->
+        <main class="content">
+            <div class="content-header">
+                <h1 id="content-title">个人资料设置</h1>
+            </div>
+            <div class="content-body" id="content-body">
+                <!-- 个人资料设置内容 -->
+                <div id="profile-content">
+                    <h3>基本信息</h3>
+                    <form style="margin-top: 20px;">
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; color: #2d8659;">用户名</label>
+                            <span id="username"></span>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <img id="head" class="head" />
+                            <br />
+                            上传新头像:
+                            <input type="file" id="new_head" />
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; color: #2d8659;">邮箱</label>
+                            <input type="email" id="email"
+                                style="width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" id="">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; color: #2d8659;">手机号</label>
+                            <input type="tel" id="phone"
+                                style="width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; color: #2d8659;">修改密码(不修改请留空)</label>
+                            <input type="password" placeholder="原密码" id="password"
+                                style="width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
+                            <input type="password" placeholder="新密码" id="new_password"
+                                style="width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
+                            <input type="password" placeholder="重复新密码" id="new_password_again"
+                                style="width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
+                        </div>
+                        <button type="button" onclick="update()"
+                            style="background-color: #2d8659; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer;">保存修改</button>
+                    </form>
+                </div>
+
+                <!-- 其他成员列表内容（默认隐藏） -->
+                <table id="member-content" style="display: none;overflow: auto;width: 100%;text-align: center;">
+                </table>
+            </div>
+        </main>
+    </div>
+    <script src="./js/s.js"></script>
+    <script src="./js/network.js"></script>
+    <script>
+        buildTr = (...value) => {
+            var tr = document.createElement("tr");
+            value.forEach(item => {
+                var td = document.createElement("td");
+                if (typeof item == "string") td.innerHTML = item;
+                else td.appendChild(item);
+                tr.appendChild(td);
+            })
+            return tr;
+        }
+        // 1. 单文件上传
+        function uploadHead() {
+            const fileInput = document.getElementById('new_head');
+            const file = fileInput.files[0]; // 获取选中的单个文件
+
+            // 校验：未选择文件
+            if (!file) {
+                return alert("未选择文件");
+            }
+
+            try {
+                // 创建 FormData 对象，Key 必须和后端的 upload.single('avatar') 中的 'avatar' 一致
+                const formData = new FormData();
+                formData.append('avatar', file); // 第一个参数是后端约定的 name，第二个是文件对象
+                fetch(location.origin + "/updatePersonHead", {
+                    method: 'POST',
+                    headers: {
+                        "token": SRead("token")
+                    },
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success == false) return alert(data.message);
+                        location.reload();
+                    })
+                    .catch(error => console.error('Error:', error));
+            } catch (error) {
+                alert(error.message)
+            }
+        }
+        update = () => {
+            if (document.getElementById("new_password").value != document.getElementById("new_password_again").value)
+                return alert("新密码两次不一致");
+            if (document.getElementById('new_head').files.length > 0) uploadHead();
+            visit("updatePersonInfomation", {
+                email: document.getElementById("email").value,
+                phone: document.getElementById("phone").value,
+                password: document.getElementById("password").value,
+                new_password: document.getElementById("new_password").value,
+            }, (data) => {
+                alert("修改成功");
+            })
+        }
+        visit("getInfo", (data) => {
+            document.getElementById("email").value = data.infomation.email;
+            document.getElementById("phone").value = data.infomation.phone;
+            document.getElementById("head").src = `${location.origin}/heads/${SRead("token").split("~")[0]}`;
+            if (data.infomation.level == "admin" || data.infomation.level == "root") {
+                document.getElementById("member-content").appendChild(
+                    buildTr("头像", "", "用户名", "", "权限", "密码", "邮箱", "电话", "令牌")
+                )
+                var button = document.createElement("button");
+                button.textContent = "添加新成员";
+                button.style["min-width"] = "76px";
+
+
+                var username = document.createElement("input");
+                username.type = "text";
+
+                var email = document.createElement("input");
+                email.type = "email";
+
+                var phone = document.createElement("input");
+                phone.type = "tel";
+
+                var token = document.createElement("input");
+                token.type = "text";
+
+
+                var password = document.createElement("input");
+                password.type = "password";
+                button.addEventListener("click", () => {
+                    visit("newUser", {
+                        username: username.value,
+                        email: email.value,
+                        phone: phone.value,
+                        token: token.value,
+                        password: password.value,
+
+                    }, () => {
+                        alert("已创建，请刷新界面并查看列表最下层");
+                    })
+                })
+                document.getElementById("member-content").appendChild(
+                    buildTr("", button, username, "", "member", password, email, phone, token)
+                )
+
+            }
+            if (data.infomation.level == "root") {
+                visit("getMemberInfomation", (data) => {
+                    Object.keys(data.list).forEach(item => {
+                        var head = document.createElement("img");
+                        head.src = `${location.origin}/heads/${item}`;
+                        head.classList.add("head");
+
+                        var button1 = document.createElement("button");
+                        button1.textContent = "重置头像";
+                        button1.style["min-width"] = "64px";
+                        button1.addEventListener("click", () => {
+                            if (confirm(`确定要重置 ${item} 的头像吗？`) == true) {
+                                visit("resetUserHead", { name: item }, () => {
+                                    alert("已重置");
+                                    head.src = `${location.origin}/heads/backup`;
+                                })
+                            }
+                        })
+
+                        var name = document.createElement("span");
+                        name.textContent = item;
+
+                        var button2 = document.createElement("button");
+                        button2.textContent = "注销用户";
+                        button2.style["min-width"] = "64px";
+                        button2.addEventListener("click", () => {
+                            if (confirm(`确定要注销 ${item} 的账号吗？（即删除 ${item} 的账号）`) == true) {
+                                visit("cancelUser", { name: item }, () => {
+                                    button2.parentNode.parentNode.style.display = "none";
+                                })
+                            }
+                        })
+
+                        var level = document.createElement("select");
+                        level.addEventListener("change", () => {
+                            if (confirm(`确定要更改 ${item} 的权限吗？\n -> ${level.value}`) == true) {
+                                visit("setUserLevel", { name: item, level: level.value }, () => {
+                                    if(item == SRead("token").split("~")[0])location.reload();
+                                    else alert("已更改");
+                                });
+                            }
+                        });
+
+
+                        var option1 = document.createElement("option");
+                        option1.textContent = "超级管理员";
+                        option1.value = "root";
+                        level.appendChild(option1);
+
+                        var option2 = document.createElement("option");
+                        option2.textContent = "管理员";
+                        option2.value = "admin";
+                        level.appendChild(option2);
+
+                        var option3 = document.createElement("option");
+                        option3.textContent = "普通成员";
+                        option3.value = "member";
+                        level.appendChild(option3);
+
+                        level.value = data.list[item].level;
+
+                        var password = document.createElement("input");
+                        password.type = "password";
+                        password.value = data.list[item].password;
+                        password.addEventListener("change", () => {
+                            if (confirm(`确定要更改 ${item} 的密码吗？`) == true) {
+                                visit("setUserPassword", { name: item, password: password.value }, () => {
+                                    alert("已更改");
+                                })
+                            }
+                        });
+
+                        var email = document.createElement("input");
+                        email.type = "email";
+                        email.value = data.list[item].email;
+                        email.addEventListener("change", () => {
+                            visit("setUserEmail", { name: item, email: email.value }, () => {
+                                alert("已更改");
+                            })
+                        });
+
+                        var phone = document.createElement("input");
+                        phone.type = "tel";
+                        phone.value = data.list[item].phone;
+                        phone.addEventListener("change", () => {
+                            visit("setUserPhone", { name: item, phone: phone.value }, () => {
+                                alert("已更改");
+                            })
+                        });
+
+                        var token = document.createElement("input");
+                        token.type = "text";
+                        token.value = data.list[item].token;
+                        token.addEventListener("change", () => {
+                            if (confirm(`确定要更改 ${item} 的令牌吗？`) == true) {
+                                visit("setUserToken", { name: item, token: token.value }, () => {
+                                    alert("已更改");
+                                })
+                            }
+                        });
+
+                        document.getElementById("member-content").appendChild(
+                            buildTr(head, button1, name, button2, level, password, email, phone, token)
+                        )
+                    })
+                });
+                document.getElementById("username").innerHTML += `<span style="background: red;color: white;border-radius: 4px;padding: 2px;margin-left: 5px;">超级管理员</span>`;
+                document.getElementById("manageMember").style.display = "block";
+            }
+
+            else if (data.infomation.level == "admin") {
+                visit("getMemberInfomation", (data) => {
+                    Object.keys(data.list).forEach(item => {
+                        var head = document.createElement("img");
+                        head.src = `${location.origin}/heads/${item}`;
+                        head.classList.add("head");
+
+                        var name = document.createElement("span");
+                        name.textContent = item;
+
+                        if (data.list[item].level == "member") {
+                            var button2 = document.createElement("button");
+                            button2.textContent = "注销用户";
+                            button2.style["min-width"] = "64px";
+                            button2.addEventListener("click", () => {
+                                if (confirm(`确定要注销 ${item} 的账号吗？（即删除 ${item} 的账号）`) == true) {
+                                    visit("cancelUser", { name: item }, () => {
+                                        button2.parentNode.parentNode.style.display = "none";
+                                    })
+                                }
+                            })
+
+                            var password = document.createElement("input");
+                            password.type = "password";
+                            password.value = data.list[item].password;
+                            password.addEventListener("change", () => {
+                                if (confirm(`确定要更改 ${item} 的密码吗？`) == true) {
+                                    visit("setUserPassword", { name: item, password: password.value }, () => {
+                                        alert("已更改");
+                                    })
+                                }
+                            });
+
+                            var email = document.createElement("input");
+                            email.type = "email";
+                            email.value = data.list[item].email;
+                            email.addEventListener("change", () => {
+                                visit("setUserEmail", { name: item, email: email.value }, () => {
+                                    alert("已更改");
+                                })
+                            });
+
+                            var phone = document.createElement("input");
+                            phone.type = "tel";
+                            phone.value = data.list[item].phone;
+                            phone.addEventListener("change", () => {
+                                visit("setUserPhone", { name: item, phone: phone.value }, () => {
+                                    alert("已更改");
+                                })
+                            });
+
+                            var button1 = document.createElement("button");
+                            button1.textContent = "重置头像";
+                            button1.style["min-width"] = "64px";
+                            button1.addEventListener("click", () => {
+                                if (confirm(`确定要重置 ${item} 的头像吗？`) == true) {
+                                    visit("resetUserHead", { name: item }, () => {
+                                        alert("已重置");
+                                        head.src = `${location.origin}/heads/backup`;
+                                    })
+                                }
+                            })
+
+                            var token = document.createElement("input");
+                            token.type = "text";
+                            token.value = data.list[item].token;
+                            token.addEventListener("change", () => {
+                                if (confirm(`确定要更改 ${item} 的令牌吗？`) == true) {
+                                    visit("setUserToken", { name: item, token: token.value }, () => {
+                                        alert("已更改");
+                                    })
+                                }
+                            });
+                            document.getElementById("member-content").appendChild(
+                                buildTr(head, button1, name, button2, data.list[item].level, password, email, phone, token)
+                            )
+                        }
+                        else {
+                            document.getElementById("member-content").appendChild(
+                                // buildTr(head, button1, name, "", data.list[item].level, email, phone, token)
+                                buildTr(head, "", name, "", data.list[item].level, "***", data.list[item].email, data.list[item].phone, "***")
+                            )
+                        }
+
+                    })
+                });
+                document.getElementById("username").innerHTML += `<span style="background: #08C;color: white;border-radius: 4px;padding: 2px;margin-left: 5px;">管理员</span>`;
+                document.getElementById("manageMember").style.display = "block";
+            };
+        });
+        // 切换菜单内容显示
+        function showContent(type, title) {
+            // 隐藏所有内容
+            document.getElementById('profile-content').style.display = 'none';
+            document.getElementById('member-content').style.display = 'none';
+
+            // 移除所有菜单的active类
+            const menuLinks = document.querySelectorAll('.menu-link');
+            menuLinks.forEach(link => link.classList.remove('active'));
+
+            // 显示对应内容并激活菜单
+            document.getElementById(`${type}-content`).style.display = 'block';
+            event.target.classList.add('active');
+
+            document.getElementById('content-title').textContent = title;
+        }
+
+        // 退出登录功能
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                // 这里可以添加实际的退出登录逻辑，比如跳转到登录页
+                SSave("token", "");
+                location.href = "/editor/login.html";
+                // window.location.href = 'login.html'; // 实际项目中可启用此行跳转登录页
+            }
+        }
+        document.getElementById("username").innerHTML = SRead("token").split("~")[0];
+    </script>
+</body>
+
+</html>

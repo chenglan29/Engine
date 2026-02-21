@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新建项目</title>
+    <style>
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            vertical-align: middle;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            padding: 20px;
+        }
+
+        /* 主容器样式 */
+        .project-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        /* 标题样式 */
+        .page-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* 表单组样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #409eff;
+            box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        /* 成员列表样式 */
+        .member-section {
+            margin-top: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        /* 检索框样式 */
+        .search-box {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .search-input {
+            padding-left: 35px;
+        }
+
+        .member-list {
+            border: 1px solid #eee;
+            border-radius: 4px;
+            overflow: hidden;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .member-item:last-child {
+            border-bottom: none;
+        }
+
+        .member-name {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .member-role-input {
+            width: 180px;
+            flex: 1;
+            margin: 0 15px;
+        }
+
+        /* 无结果提示 */
+        .no-result {
+            padding: 20px;
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-invite {
+            background-color: #409eff;
+            flex: 0.5;
+            color: white;
+        }
+
+        .btn-invite:hover {
+            background-color: #66b1ff;
+        }
+
+        .btn-invite.invited {
+            background-color: red;
+        }
+
+        .btn-invite.invited:hover {
+            background-color: red;
+        }
+
+        .btn-submit {
+            margin-top: 30px;
+            background-color: #67c23a;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+
+        .btn-submit:hover {
+            background-color: #85ce61;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 600px) {
+            .member-item {
+                flex-wrap: wrap;
+            }
+
+            .member-role-input {
+                width: 100%;
+                margin: 10px 0;
+            }
+
+            .btn-invite {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="project-container">
+        <!-- 页面标题 -->
+        <h1 class="page-title">
+            <button style="width: 24px;height: 24px;" onclick="location.href='./index.html'">&#60;</button>
+            新建项目
+        </h1>
+
+        <!-- 项目基本信息 -->
+        <div class="form-group">
+            <label for="project-name">项目名称</label>
+            <input type="text" id="project-name" placeholder="请输入项目名称">
+        </div>
+
+        <div class="form-group">
+            <label for="project-desc">项目介绍</label>
+            <textarea id="project-desc" placeholder="请输入项目的详细介绍..."></textarea>
+        </div>
+
+        <!-- 成员邀请列表（带检索） -->
+        <div class="member-section">
+            <h2 class="section-title">邀请项目成员</h2>
+
+            <!-- 检索框 -->
+            <div class="search-box">
+                <input type="text" id="member-search" class="search-input" placeholder="请输入成员姓名检索">
+            </div>
+
+            <!-- 成员列表 -->
+            <div class="member-list" id="member-list-container">
+            </div>
+        </div>
+
+        <!-- 提交按钮 -->
+        <button class="btn btn-submit" onclick="submitProject()">创建项目</button>
+    </div>
+    <script src="./js/s.js"></script>
+    <script src="./js/network.js"></script>
+    <script>
+        visit("getUserList", (data) => {
+            data.userList.forEach(item => {
+                document.getElementById('member-list-container').innerHTML += `
+                        <div class="member-item" data-name="${item}">
+                            <div class="member-name">${item}</div>
+                            <input type="text" class="member-role-input" placeholder="请输入职位">
+                            <button class="btn btn-invite" onclick="toggleInvite(this)">邀请</button>
+                        </div>
+                    `;
+            })
+            var searchInput = document.getElementById('member-search');
+            var memberListContainer = document.getElementById('member-list-container');
+            var memberItems = document.querySelectorAll('.member-item');
+            var noResultNode = document.createElement('div');
+            noResultNode.className = 'no-result';
+            noResultNode.textContent = '暂无匹配的成员';
+
+            // 实时检索逻辑
+            searchInput.addEventListener('input', function () {
+                var searchValue = this.value.trim().toLowerCase();
+                var hasMatch = false;
+
+                // 移除之前的无结果提示
+                if (memberListContainer.contains(noResultNode)) {
+                    memberListContainer.removeChild(noResultNode);
+                }
+
+                // 遍历成员项进行匹配
+                memberItems.forEach(item => {
+                    const memberName = item.dataset.name.toLowerCase();
+                    if (searchValue === '' || memberName.includes(searchValue)) {
+                        item.style.display = 'flex';
+                        hasMatch = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                // 无匹配结果时显示提示
+                if (!hasMatch && searchValue !== '') {
+                    memberListContainer.appendChild(noResultNode);
+                }
+            });
+        });
+    </script>
+    <script src="./js/network.js"></script>
+    <script>
+        // 切换邀请状态
+        function toggleInvite(btn) {
+            if (btn.classList.contains('invited')) {
+                // 取消邀请
+                btn.classList.remove('invited');
+                btn.textContent = '邀请';
+            } else {
+                // 标记为已邀请
+                btn.classList.add('invited');
+                btn.textContent = '取消邀请';
+            }
+        }
+
+        // 提交项目
+        function submitProject() {
+            // 获取项目基本信息并验证
+            const projectName = document.getElementById('project-name').value.trim();
+            const projectDesc = document.getElementById('project-desc').value.trim();
+
+            if (!projectName) {
+                alert('请输入项目名称！');
+                document.getElementById('project-name').focus();
+                return;
+            }
+
+            // 收集已邀请的成员信息（包含检索后显示的成员）
+            const invitedMembers = [];
+            document.querySelectorAll('.btn-invite.invited').forEach(btn => {
+                const item = btn.parentElement;
+                const name = item.querySelector('.member-name').textContent;
+                const role = item.querySelector('.member-role-input').value.trim();
+                invitedMembers.push({
+                    name: name,
+                    role: role
+                });
+            });
+            // 模拟提交成功，打印信息到控制台并提示用户
+            visit("submitProject",{
+                        projectName: projectName,
+                        projectDescription: projectDesc,
+                        invitedMembers: invitedMembers
+                },(data)=>{
+                    if (data.success == false) return alert(data.message);
+                    alert("提交成功，等待管理审核");
+                })
+        }
+    </script>
+</body>
+
+</html>
