@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engine - 项目界面</title>
+    <style>
+        /* 全局样式重置和基础设置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            vertical-align: middle;
+        }
+
+        body {
+            background-color: #1e1e1e;
+            color: #cccccc;
+            /* overflow: hidden; */
+            height: 100vh;
+            min-width: 800px;
+        }
+
+        iframe {
+            border: none;
+        }
+
+        /* 顶部工具栏样式 */
+        .unity-toolbar {
+            height: 30px;
+            background-color: #303030;
+            border-bottom: 1px solid #181818;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            gap: 15px;
+            user-select: none;
+            position: relative;
+            /* 为下拉菜单定位做准备 */
+        }
+
+        /* 菜单按钮样式增强 */
+        .menu-btn {
+            color: #cccccc;
+            background: none;
+            border: none;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 12px;
+            border-radius: 2px;
+            position: relative;
+            /* 用于定位下拉菜单 */
+        }
+
+        .menu-btn:hover,
+        .menu-btn.active {
+            background-color: #444444;
+        }
+
+        /* 下拉菜单样式 */
+        .dropdown-menu {
+            position: absolute;
+            top: 30px;
+            /* 紧贴工具栏下方 */
+            left: 0;
+            background-color: #303030;
+            border: 1px solid #181818;
+            border-top: none;
+            min-width: 180px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            /* 默认隐藏 */
+        }
+
+        .menu-btn.active .dropdown-menu {
+            display: block;
+            /* 激活时显示 */
+        }
+
+        /* 菜单项样式 */
+        .menu-item {
+            padding: 4px 10px 4px 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-item:hover {
+            background-color: #007acc;
+            color: #ffffff;
+        }
+
+        /* 菜单分隔线 */
+        .menu-divider {
+            height: 1px;
+            background-color: #444444;
+            margin: 2px 0;
+        }
+
+        /* 快捷键提示 */
+        .menu-shortcut {
+            color: #999999;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+
+        .toolbar-btn {
+            color: #cccccc;
+            background: none;
+            border: none;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 12px;
+            border-radius: 2px;
+        }
+
+        .toolbar-btn:hover {
+            background-color: #444444;
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 20px;
+            background-color: #444444;
+        }
+
+        /* 主容器布局 */
+        .unity-container {
+            display: flex;
+            height: calc(100vh - 30px);
+        }
+
+        /* 左侧面板 (Project/Console) */
+        .unity-left-panel {
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #181818;
+        }
+
+        /* 面板头部样式 */
+        .panel-header {
+            height: 22px;
+            background-color: #252526;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            font-size: 11px;
+            border-bottom: 1px solid #181818;
+            user-select: none;
+        }
+
+        .panel-tabs {
+            display: flex;
+            gap: 5px;
+        }
+
+        .panel-tab {
+            padding: 2px 6px;
+            cursor: pointer;
+            border-radius: 2px 2px 0 0;
+        }
+
+        .panel-tab.active {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+
+        .panel-tab:hover:not(.active) {
+            background-color: #3a3a3a;
+        }
+
+        /* 面板内容区域 */
+        .panel-content {
+            flex: 1;
+            padding: 5px;
+            font-size: 12px;
+            overflow: auto;
+        }
+
+        /* 项目面板内容 */
+        .project-item {
+            padding: 2px 5px;
+            margin: 1px 0;
+            border-radius: 2px;
+            cursor: pointer;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .project-item:hover {
+            background-color: #37373d;
+        }
+
+        /* 中间主区域 (Scene/Game) */
+        .unity-main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #181818;
+        }
+
+        .scene-view {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 右侧检查器面板 */
+        .unity-inspector-panel {
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 检查器面板属性项 */
+        .inspector-property {
+            padding: 8px 5px;
+            border-bottom: 1px solid #2d2d30;
+        }
+
+        .property-label {
+            font-size: 11px;
+            color: #9cdcfe;
+            margin-bottom: 4px;
+        }
+
+        .property-input {
+            width: 100%;
+            background-color: #2d2d30;
+            border: 1px solid #444444;
+            color: #ffffff;
+            padding: 4px;
+            border-radius: 2px;
+            font-size: 12px;
+            resize: vertical;
+        }
+
+        /* 分割线样式 (用于拖拽调整面板大小) */
+        .splitter {
+            width: 4px;
+            height: 100%;
+            background-color: #303030;
+            cursor: ew-resize;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: none;
+            /* 关键：禁用触摸行为，提升拖拽响应 */
+            user-select: none;
+        }
+
+        .splitter:hover {
+            background-color: #444444;
+        }
+
+        .splitter-handle {
+            width: 1px;
+            height: 20px;
+            background-color: #666666;
+        }
+
+        /* 底部控制台面板 */
+        .unity-console-panel {
+            height: 200px;
+            border-top: 1px solid #181818;
+        }
+
+        .console-message {
+            padding: 2px 5px;
+            font-size: 11px;
+            border-bottom: 1px solid #2d2d30;
+        }
+
+        .console-log {
+            color: #cccccc;
+        }
+
+        .console-warning {
+            color: #dcdcaa;
+        }
+
+        .console-error {
+            color: #f48771;
+        }
+    </style>
+    <style>
+        /* ========== 自定义滚动条样式 (适配 Unity 风格) ========== */
+        /* 1. 基础滚动条容器 (Webkit内核: Chrome/Edge/Safari) */
+        ::-webkit-scrollbar {
+            width: 10px;
+            /* 纵向滚动条宽度 */
+            height: 10px;
+            /* 横向滚动条高度 */
+            background-color: #1e1e1e;
+            /* 滚动条背景，匹配编辑器主背景 */
+        }
+
+        /* 2. 滚动条轨道 */
+        ::-webkit-scrollbar-track {
+            background-color: #252526;
+            /* 轨道背景色，匹配面板头部 */
+            border-radius: 5px;
+            /* 圆角，贴合Unity风格 */
+        }
+
+        /* 3. 滚动条滑块 */
+        ::-webkit-scrollbar-thumb {
+            background-color: #444444;
+            /* 滑块默认颜色 */
+            border-radius: 5px;
+            /* 圆角 */
+            border: 2px solid #252526;
+            /* 边框，营造内凹效果 */
+            transition: background-color 0.2s ease;
+            /* 过渡动画，更丝滑 */
+        }
+
+        /* 4. 滑块hover状态 (Unity标志性蓝色高亮) */
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #007acc;
+        }
+
+        /* 5. 滑块active状态 (按下时加深) */
+        ::-webkit-scrollbar-thumb:active {
+            background-color: #005a9e;
+        }
+
+        /* 6. 滚动条边角 (横竖滚动条交汇处) */
+        ::-webkit-scrollbar-corner {
+            background-color: #1e1e1e;
+            /* 匹配主背景 */
+        }
+
+        /* 7. Firefox 适配 (兼容火狐浏览器) */
+        * {
+            scrollbar-width: thin;
+            /* 滚动条宽度：thin/auto/none */
+            scrollbar-color: #444444 #252526;
+            /* 滑块颜色 轨道颜色 */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 顶部工具栏 -->
+    <div class="unity-toolbar">
+        <!-- File 菜单（带下拉） -->
+        <button class="menu-btn" id="fileMenuBtn">
+            文件
+            <div class="dropdown-menu" id="fileDropdown">
+                <!-- <div class="menu-item">New Scene <span class="menu-shortcut">Ctrl+N</span></div>
+                <div class="menu-item">Open Scene <span class="menu-shortcut">Ctrl+O</span></div>
+                <div class="menu-item">Save Scene <span class="menu-shortcut">Ctrl+S</span></div>
+                <div class="menu-item">Save Scene As... <span class="menu-shortcut">Ctrl+Shift+S</span></div>
+                <div class="menu-divider"></div>
+                <div class="menu-item">New Project...</div>
+                <div class="menu-item">Open Project...</div>
+                <div class="menu-divider"></div>
+                <div class="menu-item">Build Settings... <span class="menu-shortcut">Ctrl+Shift+B</span></div>
+                <div class="menu-item">Build & Run <span class="menu-shortcut">Ctrl+B</span></div>
+                <div class="menu-divider"></div> -->
+                <div class="menu-item" onclick="location.href='./index.html'">退出</div>
+            </div>
+        </button>
+
+        <!-- Edit 菜单（带下拉） -->
+        <button class="menu-btn" id="editMenuBtn">
+            编辑
+            <div class="dropdown-menu" id="editDropdown">
+                <!-- <div class="menu-item">撤销 <span class="menu-shortcut">Ctrl+Z</span></div>
+                <div class="menu-item">恢复 <span class="menu-shortcut">Ctrl+Y</span></div>
+                <div class="menu-divider"></div>
+                <div class="menu-item">Cut <span class="menu-shortcut">Ctrl+X</span></div>
+                <div class="menu-item">Copy <span class="menu-shortcut">Ctrl+C</span></div>
+                <div class="menu-item">Paste <span class="menu-shortcut">Ctrl+V</span></div>
+                <div class="menu-divider"></div>
+                <div class="menu-item">Preferences...</div> -->
+            </div>
+        </button>
+
+        <button class="toolbar-btn">帮助</button>
+        <div class="toolbar-divider"></div>
+        <!-- <button class="toolbar-btn">演绎</button>
+        <button class="toolbar-btn">暂停</button> -->
+        <div class="toolbar-divider"></div>
+        <button class="toolbar-btn" onclick="build()">构建</button>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="unity-container">
+        <!-- 左侧面板 -->
+        <div class="unity-left-panel" id="leftPanel">
+            <!-- 项目面板 -->
+            <div style="flex: 1; display: flex; flex-direction: column;">
+                <div class="panel-header">
+                    <div class="panel-tabs">
+                        <div class="panel-tab active" data-panel="project">目录</div>
+                    </div>
+                </div>
+                <div class="panel-content" id="projectPanel">
+                </div>
+            </div>
+
+            <!-- 控制台面板 -->
+            <div class="unity-console-panel">
+                <div class="panel-header">
+                    <div class="panel-tabs">
+                        <div class="panel-tab active">控制台</div>
+                    </div>
+                </div>
+                <div class="panel-content" id="console">
+                    <!-- <div class="console-message console-log">[LOG] Project loaded successfully</div>
+                    <div class="console-message console-warning">[WARNING] Missing collider on GameObject: Player</div>
+                    <div class="console-message console-error">[ERROR] NullReferenceException in GameManager.cs:24</div>
+                    <div class="console-message console-log">[LOG] Scene "MainScene" loaded</div> -->
+                </div>
+                <input type="text"
+                    style="width: 100%;bottom: 0;color: white;border: none;background: none;height: 18px;"
+                    placeholder="点击输入" onkeypress="press(event,this)" />
+            </div>
+        </div>
+
+        <!-- 左侧分割线 -->
+        <div class="splitter" id="leftSplitter" onmousedown="drag ='leftSplitter'">
+            <div class="splitter-handle"></div>
+        </div>
+
+        <!-- 中间主区域 -->
+        <div class="unity-main-area">
+            <div class="panel-header">
+                <div class="panel-tabs">
+                    <div class="panel-tab active">场景</div>
+                    <!-- <div class="panel-tab">代码</div> -->
+                </div>
+            </div>
+            <iframe class="scene-view" id="scene-view"></iframe>
+        </div>
+
+        <!-- 右侧分割线 -->
+        <div class="splitter" id="rightSplitter" onmousedown="drag ='rightSplitter'">
+            <div class="splitter-handle"></div>
+        </div>
+
+        <!-- 右侧检查器面板 -->
+        <div class="unity-inspector-panel" id="inspectorPanel">
+            <div class="panel-header">
+                <div class="panel-tabs">
+                    <div class="panel-tab active" id="panel-tab"
+                        style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width: 134px;"></div>
+                </div>
+            </div>
+            <div class="panel-content" id="panel-content">
+            </div>
+        </div>
+    </div>
+    <script src="./js/defined.js"></script>
+    <script>
+        // 菜单展开/收起逻辑
+        document.addEventListener('DOMContentLoaded', function () {
+            // 获取所有菜单按钮和下拉菜单
+            const menuBtns = document.querySelectorAll('.menu-btn');
+            const dropdownMenus = document.querySelectorAll('.dropdown-menu');
+
+            // 点击菜单按钮切换展开/收起
+            menuBtns.forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    // 阻止事件冒泡，避免触发全局点击关闭
+                    e.stopPropagation();
+
+                    // 关闭其他所有菜单
+                    menuBtns.forEach(otherBtn => {
+                        if (otherBtn !== btn) {
+                            otherBtn.classList.remove('active');
+                        }
+                    });
+
+                    // 切换当前菜单的激活状态
+                    this.classList.toggle('active');
+                });
+            });
+
+            // 点击页面其他区域关闭所有菜单
+            document.addEventListener('click', function () {
+                menuBtns.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+            });
+
+            // 阻止点击下拉菜单内部时关闭菜单
+            dropdownMenus.forEach(menu => {
+                menu.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                });
+            });
+
+            // 菜单项点击事件（示例：控制台输出）
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', function () {
+                    const menuText = this.textContent.trim().split(' ')[0];
+                    const consolePanel = document.querySelector('.unity-console-panel .panel-content');
+                    const newLog = document.createElement('div');
+                    newLog.className = 'console-message console-log';
+                    newLog.textContent = `[LOG] Menu action: ${menuText}`;
+                    consolePanel.prepend(newLog); // 添加到控制台顶部
+
+                    // 关闭菜单
+                    menuBtns.forEach(btn => btn.classList.remove('active'));
+                });
+            });
+        });
+
+        // 面板分割线拖拽调整大小功能
+        // 优化后的拖拽逻辑（核心修改部分）
+        function initSplitter(splitterId, targetPanelId, isLeftPanel = true) {
+            const splitter = document.getElementById(splitterId);
+            const targetPanel = document.getElementById(targetPanelId);
+            const container = document.querySelector('.unity-container');
+
+            let isDragging = false;
+            let startX = 0;          // 拖拽开始时的鼠标X坐标
+            let startWidth = 0;      // 拖拽开始时的面板宽度
+            let containerRect = null; // 容器位置缓存
+
+            // 优化：使用passive: true提升触摸/鼠标事件性能
+            const mouseDownHandler = (e) => {
+                isDragging = true;
+                startX = e.clientX;
+                // 缓存初始宽度和容器位置（避免mousemove中重复计算）
+                startWidth = parseFloat(getComputedStyle(targetPanel).width);
+                containerRect = container.getBoundingClientRect();
+
+                document.body.style.cursor = 'ew-resize';
+                document.body.style.userSelect = 'none'; // 防止拖拽时选中文本
+
+                // 优化：只在拖拽时添加mousemove/up监听，减少性能消耗
+                document.addEventListener('mousemove', mouseMoveHandler, { passive: true });
+                document.addEventListener('mouseup', mouseUpHandler, { once: true });
+
+                e.preventDefault();
+            };
+
+            const mouseMoveHandler = (e) => {
+                if (!isDragging) return;
+                document.getElementById("scene-view").style.display = "none";
+                // 核心优化：基于偏移量计算，而非重新计算绝对位置
+                const deltaX = e.clientX - startX;
+                let newWidth = startWidth + (isLeftPanel ? deltaX : -deltaX);
+
+                // 宽度限制（提前定义常量，减少计算）
+                const MIN_WIDTH = 150;
+                const MAX_WIDTH = 500;
+                newWidth = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, newWidth));
+
+                // 直接设置宽度，避免重复DOM查询
+                targetPanel.style.width = `${newWidth}px`;
+            };
+
+            const mouseUpHandler = () => {
+                document.getElementById("scene-view").style.display = "flex";
+
+                isDragging = false;
+                document.body.style.cursor = 'default';
+                document.body.style.userSelect = 'auto';
+
+                // 移除临时监听，释放资源
+                document.removeEventListener('mousemove', mouseMoveHandler);
+            };
+
+            // 初始绑定mousedown事件
+            splitter.addEventListener('mousedown', mouseDownHandler);
+
+            // 兼容触摸设备（可选，提升多端适配）
+            splitter.addEventListener('touchstart', (e) => {
+                mouseDownHandler(e.touches[0]);
+            }, { passive: true });
+
+            document.addEventListener('touchmove', (e) => {
+                if (isDragging) {
+                    mouseMoveHandler(e.touches[0]);
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchend', mouseUpHandler, { once: true });
+        }
+
+        // 初始化分割线
+        initSplitter('leftSplitter', 'leftPanel', true);
+        initSplitter('rightSplitter', 'inspectorPanel', false);
+        // 面板标签切换功能
+        document.querySelectorAll('.panel-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 获取同组的所有标签
+                const parentTabs = tab.parentElement.querySelectorAll('.panel-tab');
+                // 移除所有active状态
+                parentTabs.forEach(t => t.classList.remove('active'));
+                // 给当前点击的标签添加active状态
+                tab.classList.add('active');
+
+                // 这里可以扩展：根据标签切换对应的面板内容
+                const panelName = tab.getAttribute('data-panel');
+                if (panelName) {
+                    // 示例：切换Project/Hierarchy面板
+                    console.log(`切换到 ${panelName} 面板`);
+                }
+            });
+        });
+    </script>
+    <script src="./js/s.js"></script>
+    <script src="./js/network.js"></script>
+    <script>
+        tree = (path, level, name) => {
+            var res = "";
+            path.forEach((item, index) => {
+                var t = index;
+                console.log(item)
+                if (item != null) {
+                    if (item["类型"] != undefined) t += " " + item["类型"];
+                    if (item.ID != undefined) t += "#" + item.ID;
+                    res += `<div class="project-item" style="padding-left: ${level * 15}px;" onclick="attribute('${name}${index}')">${t}</div>`;
+                    if (item.path) {
+                        res += tree(item.path, level + 1, name + index + ".");
+                    }
+                }
+            });
+            return res;
+        }
+        var path;
+        visit("getProject", {
+            "project": location.href.split("?")[1]
+        }, (data) => {
+            path = data.path;
+            document.getElementById("projectPanel").innerHTML = tree(path, 0, "");
+            socket = new WebSocket(`ws://${location.hostname}:${data.wsPort}`);
+            socket.onopen = () => {
+                socket.send(JSON.stringify({
+                    token: SRead("token"),
+                    project: location.href.split("?")[1]
+                }));
+            };
+            socket.onmessage = (msg) => {
+                var data = JSON.parse(msg.data);
+                if (data.type == "console.log") {
+                    document.getElementById("console").innerHTML += `[${new Date()}]${data.message}<br/>`;
+                }
+                else if (data.modify != undefined) {
+                    var obj = path;
+                    data.modify.name.split(".").forEach((item, index) => {
+                        if (index != data.modify.name.split(".").length - 1) obj = obj[item].path;
+                        else obj = obj[item];
+                    });
+                    obj[data.modify.key] = data.modify.value;
+                    if (data.modify.name == document.getElementById("panel-tab").innerHTML) attribute(data.modify.name);
+                }
+                else if (data.createObject != undefined) {
+                    var obj = path;
+                    data.createObject.name.split(".").forEach((item, index) => {
+                        if (index != data.createObject.name.split(".").length - 1) obj = obj[item].path;
+                        else obj = obj[item];
+                    });
+                    if (obj.path == undefined) obj.path = [];
+                    obj.path.push({
+                        "类型": data.createObject.type
+                    });
+                    document.getElementById("projectPanel").innerHTML = tree(path, 0, "");
+                }
+                else if (data.deleteObject != undefined) {
+                    var res = "path";
+                    data.deleteObject.split(".").forEach(item => {
+                        res += `["${item}"].path`
+                    })
+                    eval("delete " + res.substr(0, res.length - 5))
+                    document.getElementById("projectPanel").innerHTML = tree(path, 0, "");
+                }
+            };
+        });
+        attribute = (name) => {
+            var obj = path;
+            name.split(".").forEach((item, index) => {
+                if (index != name.split(".").length - 1) obj = obj[item].path;
+                else obj = obj[item];
+            });
+            document.getElementById("panel-tab").innerHTML = name;
+            document.getElementById("panel-content").innerHTML = `<p class="property-label">${obj["类型"]}</p>`;
+            var add = (item, list) => {
+                var container = document.createElement("div");
+                container.classList.add("inspector-property");
+                var title = document.createElement("span");
+                title.classList.add("property-label");
+                title.textContent = item;
+                container.appendChild(title);
+                if (list[item].type == "checkbox") {
+                    var part = document.createElement("input");
+                    part.type = "checkbox";
+                    if (obj[item] != undefined) part.checked = obj[item];
+                    else if (list[item].default != undefined) part.checked = list[item].default;
+                    container.appendChild(part);
+                    part.addEventListener("change", () => {
+                        modify(name, item, part.checked)
+                    });
+                    container.appendChild(part);
+                }
+                else if (list[item].type == "text") {
+                    var part = document.createElement("input");
+                    part.type = "text";
+                    part.classList.add("property-input");
+                    if (obj[item] != undefined) part.value = obj[item];
+                    else if (list[item].default != undefined) part.value = list[item].default;
+                    container.appendChild(part);
+                    part.addEventListener("change", () => {
+                        modify(name, item, part.value)
+                    });
+                    container.appendChild(part);
+                }
+                else if (list[item].type == "number") {
+                    var part = document.createElement("input");
+                    part.type = "number";
+                    part.classList.add("property-input");
+                    if (obj[item] != undefined) part.value = obj[item];
+                    else if (list[item].default != undefined) part.value = list[item].default;
+                    container.appendChild(part);
+                    part.addEventListener("change", () => {
+                        modify(name, item, part.value)
+                    });
+                    container.appendChild(part);
+                }
+                else if (list[item].type == "longText") {
+                    var part = document.createElement("textarea");
+                    part.type = "text";
+                    part.classList.add("property-input");
+                    if (obj[item] != undefined) part.value = obj[item];
+                    else if (list[item].default != undefined) part.value = list[item].default;
+                    container.appendChild(part);
+                    part.addEventListener("change", () => {
+                        modify(name, item, part.value)
+                    });
+                    container.appendChild(part);
+                }
+                else if (list[item].type == "select") {
+                    var part = document.createElement("select");
+
+                    Object.keys(list[item].option).forEach(_item => {
+                        var selected = "";
+                        if (obj[item] != undefined && list[item].option[_item] == obj[item]) selected = "selected";
+                        else if (list[item].default != undefined && list[item].default == obj[item]) selected = "selected";
+                        part.innerHTML += `<option value="${list[item].option[_item]}" ${selected}>${_item}</option>`
+                    })
+                    container.appendChild(part);
+                    part.addEventListener("change", () => {
+                        modify(name, item, part.value)
+                    });
+                    container.appendChild(part);
+                }
+                document.getElementById("panel-content").appendChild(container);
+            }
+            if (tagList[obj["类型"]].allow != undefined) {
+                tagList[obj["类型"]].allow.forEach(item => {
+                    add(item, attributeList)
+                })
+            }
+            if (tagList[obj["类型"]].deny != "globalAttributeList") {
+                Object.keys(globalAttributeList).forEach(item => {
+                    add(item, globalAttributeList)
+                })
+            }
+            if (tagList[obj["类型"]].child != undefined && tagList[obj["类型"]].child == true) {
+                var container = document.createElement("div");
+                container.classList.add("inspector-property");
+                var title = document.createElement("span");
+                title.classList.add("property-label");
+                title.textContent = "添加内容";
+                container.appendChild(title);
+                var select = document.createElement("select");
+                Object.keys(tagList).forEach((_item, index) => {
+                    if (tagList[_item].create == undefined || tagList[_item].create == true) {
+                        var opt = document.createElement("option");
+                        opt.textContent = _item;
+                        select.appendChild(opt);
+                    }
+                })
+                var button = document.createElement("button");
+                button.textContent = "确定";
+                button.addEventListener("click", () => {
+                    console.log(name, select.value)
+                    if (obj.path == undefined) obj.path = [];
+                    obj.path.push({
+                        "类型": select.value
+                    })
+                    socket.send(JSON.stringify({
+                        "createObject": {
+                            "name": name,
+                            "type": select.value
+                        }
+                    }))
+                    document.getElementById("projectPanel").innerHTML = tree(path, 0, "");
+                });
+                container.appendChild(select);
+                container.appendChild(button);
+                document.getElementById("panel-content").appendChild(container);
+
+            }
+            if (obj["类型"] != "主程序") {
+
+                var button = document.createElement("button");
+                button.textContent = "删除";
+                button.addEventListener("click", () => {
+                    if (confirm("确认删除这个对象吗？") == true) {
+                        var res = "path";
+                        name.split(".").forEach(item => {
+                            res += `["${item}"].path`
+                        })
+                        eval("delete " + res.substr(0, res.length - 5))
+                        socket.send(JSON.stringify({
+                            "deleteObject": name
+                        }))
+                        document.getElementById("projectPanel").innerHTML = tree(path, 0, "");
+                    }
+                });
+                document.getElementById("panel-content").appendChild(button);
+            }
+        }
+        modify = (name, key, value) => {
+            console.log(name, key, value);
+            socket.send(JSON.stringify({
+                "modify": {
+                    "name": name,
+                    "key": key,
+                    "value": value
+                }
+            }))
+            var obj = path;
+            name.split(".").forEach((item, index) => {
+                if (index != name.split(".").length - 1) obj = obj[item].path;
+                else obj = obj[item];
+            });
+            obj[key] = value;
+        }
+        press = (e, t) => {
+            if (e.key == "Enter") {
+                socket.send(JSON.stringify({
+                    "talk": t.value
+                }))
+                document.getElementById("console").innerHTML += `[${new Date()}]本机:${t.value}<br/>`;
+                t.value = "";
+            }
+        }
+        addEventListener("keydown", (e) => {
+            if (e.code == "KeyS" && e.ctrlKey == true) {
+                e.preventDefault();//防止习惯性按保存
+            }
+        })
+        document.getElementById("panel-content").style.maxHeight = window.innerHeight - 30 - 10 + "px";
+        document.getElementById("projectPanel").style.maxHeight = window.innerHeight - 30 - 200 - 10 + "px";
+        document.getElementById("console").style.maxHeight = "150px";
+        build = () => {
+            var timestamp = new Date().getTime();
+            visit("buildProject", {
+                "project": location.href.split("?")[1],
+                "timestamp": timestamp
+            }, () => {
+                document.getElementById("scene-view").src = `../debug/${location.href.split("?")[1]}/${timestamp}/index.html`;
+            })
+        }
+    </script>
+</body>
+
+</html>

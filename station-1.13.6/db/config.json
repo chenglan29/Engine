@@ -1,0 +1,10 @@
+{
+    "port": 80,
+    "logPath": "./log/",
+    "logMaxSize": 10485760,
+    "logBackups": 200,
+    "checkDelay": 50,
+    "tokenLength":1024,
+    "headSize": 10485760,
+    "wsPort":81
+}
