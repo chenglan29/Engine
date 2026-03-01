@@ -1,0 +1,20 @@
+:root {
+    --primary-green: #2e7d32;
+    /* 主绿色 */
+    --light-green: #81c784;
+    /* 浅绿 */
+    --dark-green: #1b5e20;
+    /* 深绿 */
+    --bg-green: #f1f8e9;
+    /* 背景绿 */
+    --text-color: #212121;
+    /* 文字颜色 */
+    --border-green: #c8e6c9;
+    /* 边框绿 */
+    --side-green: #4caf50;
+    /* 边绿 */
+    --bg-light-linear-gradient: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+    --bg-light-linear-gradient2: linear-gradient(90deg, #38f9d7 0%, #43e97b 100%);
+    --bg-linear-gradient:linear-gradient(90deg, #00b09b 0%, #96c93d 100%);
+    --bg-linear-gradient2:linear-gradient(90deg, #96c93d 0%, #00b09b 100%);
+}

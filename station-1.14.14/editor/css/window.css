@@ -1,0 +1,77 @@
+.win-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* 弹窗容器样式 */
+.win-modal {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 提示文本样式 */
+.win-tip {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+/* 输入框/文本域通用样式 */
+.win-input,
+.win-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+}
+
+/* 文本域样式（适配换行） */
+.win-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* 按钮容器样式 */
+.win-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* 按钮样式 */
+.win-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.win-cancel {
+    background: #eee;
+    color: #666;
+}
+
+.win-confirm {
+    background: #007bff;
+    color: #fff;
+}
+
+.win-confirm:hover {
+    background: #0056b3;
+}
